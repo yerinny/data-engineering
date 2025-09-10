@@ -52,11 +52,21 @@ git push origin main
 
 ## 📝 Daily Workflow (repeat every day)
 When you add new code, notes, or progress:
+(git add . is used if you worked on multiple files, meaning quick daily workflow: add everything, commit once, push once.)
+(Use git add filename - if you want more control (only commit on file).
 ```bash
 git add .
 git commit -m "Day X: description of what you did"
 git push
 ```
+vs.
+
+```bash
+git add SQL/day01_joins.sql
+''
+''
+```
+
 
 ---
 
@@ -70,4 +80,4 @@ git pull origin main --allow-unrelated-histories
 
 ---
 
-Happy Coding 🚀
+
