@@ -54,17 +54,15 @@ git push origin main
 When you add new code, notes, or progress:
 (git add . is used if you worked on multiple files, meaning quick daily workflow: add everything, commit once, push once.)
 (Use git add filename - if you want more control (only commit on file).
-```bash
-git add .
-git commit -m "Day X: description of what you did"
+# Option A (just that file)
+```git add git-cheatsheet.md
+git commit -m "Added git cheatsheet"
 git push
 ```
-vs.
-
-```bash
-git add SQL/day01_joins.sql
-''
-''
+# Option B (stage all changes in repo)
+```git add .
+git commit -m "Added git cheatsheet"
+git push
 ```
 
 
