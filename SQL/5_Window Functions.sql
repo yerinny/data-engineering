@@ -26,3 +26,12 @@ GROUP BY OrderID, OrderDate,ProductID
 
 --GROUP BY LIMITS: Can't do aggregations and provide details at the same time 9:31
 
+--WINDOW FUNCTION - PARTITION BY IS LIKE GROUP BY
+--Grouping the data by productID level
+
+SELECT
+	OrderID,
+	OrderDate,
+	ProductID,
+	SUM(Sales) OVER(PARTITION BY ProductID) TotalSalesByProducts
+FROM Sales.Orders
