@@ -65,6 +65,7 @@ END
 EXEC ProcedureName
 */
 
+--USE SalesDB
 --Step 1: Write a Query
 --For US Customers Find the Total Number of Customers and the Average Score
 
@@ -84,40 +85,72 @@ WHERE Country = 'USA'
 ALTER PROCEDURE GetCustomerSummary @Country NVARCHAR(50) = 'USA'
 AS 
 BEGIN
+	BEGIN TRY
+		DECLARE @TotalCustomers INT, @AvgScore FLOAT;
+		
+		--===============================
+		-- Step 1:Prepare & CLeanup Data
+		--===============================
+		IF EXISTS(SELECT 1 FROM Sales.Customers WHERE Score IS NULL AND Country = @Country)
+		BEGIN 
+			PRINT('Updating NULL Scores to 0')
+			UPDATE Sales.Customers
+			SET Score = 0
+			WHERE Score IS NULL AND Country = @Country;
+		END
 
-DECLARE @TotalCustomers INT, @AvgScore FLOAT;
+		ELSE
+		BEGIN
+			PRINT('No NULL Scores found')
+		END;
 
-SELECT
-	@TotalCustomers  = COUNT(*),
-	@AvgScore = AVG(Score)
-FROM Sales.Customers
-WHERE Country = @Country;
+		--==================================
+		--Step 2: Generating Summary Reports
+		--==================================
+		--Calcualte Total Customers and Average Score for specific Country
+		SELECT
+			@TotalCustomers  = COUNT(*),
+			@AvgScore = AVG(Score)
+		FROM Sales.Customers
+		WHERE Country = @Country;
 
-PRINT 'Total Customers from '  + @Country + ':' + CAST(@TotalCustomers AS NVARCHAR);
-PRINT 'Average Score from '  + @Country + ':' + CAST(@AvgScore AS NVARCHAR);
+		PRINT 'Total Customers from '  + @Country + ':' + CAST(@TotalCustomers AS NVARCHAR);
+		PRINT 'Average Score from '  + @Country + ':' + CAST(@AvgScore AS NVARCHAR);
 
---Find the total Nr. of Orders and Total Sales
-SELECT
-COUNT(OrderID) TotalOrders,
-SUM(Sales) TotalSales
-FROM Sales.Orders o
-JOIN Sales.Customers c
-ON c.CustomerID = o.CustomerID
-WHERE c.Country = @Country;
+		--Calculate Total Number of Orders and Total Sales for specific Country
+		SELECT
+			COUNT(OrderID) TotalOrders,
+			SUM(Sales) TotalSales,
+		FROM Sales.Orders o
+		JOIN Sales.Customers c
+		ON c.CustomerID = o.CustomerID
+		WHERE c.Country = @Country;
 
+	END TRY
+	BEGIN CATCH
+		--==============
+		--Error Handling
+		--==============
+		PRINT('An error occured.');
+		PRINT('Error Message:' + ERROR_MESSAGE() );
+		PRINT('Error Message:' + CAST(ERROR_NUMBER() AS NVARCHAR));
+		PRINT('Error Line:' + CAST(ERROR_LINE() AS NVARCHAR) );
+		PRINT('Error Procedure.' + ERROR_PROCEDURE());
+	END CATCH
 END
-
+GO
+--=====================================
 --Step3: Execute the Stored Procedure
-EXEC GetCustomerSummary
-
-EXEC GetCustomerSummary @Country = 'Germany'
+--=====================================
+EXEC GetCustomerSummary;
+EXEC GetCustomerSummary @Country = 'Germany';
 
 --DROP PROCEDURE GetCustomerSummaryGermany 
 
 --Find the total Nr. of Orders and Total Sales
 SELECT
-COUNT(OrderID) TotalOrders,
-SUM(Sales) TotalSales
+	COUNT(OrderID) TotalOrders,
+	SUM(Sales) TotalSales
 FROM Sales.Orders o
 JOIN Sales.Customers c
 ON c.CustomerID = o.CustomerID
@@ -126,4 +159,21 @@ WHERE c.Country = 'USA'
 --VARIABLES
 --Parameters pass values into a stored procedure or return values back to the caller.
 --Vairables temporarily store and manipulate data during its execution
+
+SELECT * FROM Sales.Customers -- handle nulls before aggregating to ensure accurate results
+
+--Error Handling
+--BEGIN TRY
+--SQL statements that might cause an error
+--END TRY
+
+--BEGIN CATCH
+--SQL Statements to handle the error
+--END CATCH
+
+
+
+
+
+
 
